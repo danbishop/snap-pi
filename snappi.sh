@@ -28,10 +28,13 @@ sudo /opt/vc/bin/tvservice -o
 grep -qxF 'dtoverlay=disable-bt' /boot/config.txt || echo 'dtoverlay=disable-bt' >> /boot/config.txt
 grep -qxF 'dtoverlay=disable-wifi' /boot/config.txt || echo 'dtoverlay=disable-wifi' >> /boot/config.txt
 # Pi specific savings
-case raspi-config nonint get_pi_type in
+case `raspi-config nonint get_pi_type` in
 
   0)
-    echo 'zero'
+    # Pi Zero
+    # Turn off LED
+    grep -qxF 'dtparam=pwr_led_trigger=default-on' /boot/config.txt || echo 'dtparam=pwr_led_trigger=default-on' >> /boot/config.txt
+    grep -qxF 'dtparam=pwr_led_activelow=off' /boot/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/config.txt
     ;;
 
   1)
@@ -39,15 +42,35 @@ case raspi-config nonint get_pi_type in
     ;;
 
   2)
-    echo '2'
+    echo ''
     ;;
 
   3)
-    echo 'three'
+    # Pi 3
+    # Turn off Power LED
+    grep -qxF 'dtparam=pwr_led_trigger=default-on' /boot/config.txt || echo 'dtparam=pwr_led_trigger=default-on' >> /boot/config.txt
+    grep -qxF 'dtparam=pwr_led_activelow=off' /boot/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/config.txt
+    # Turn off Activity LED
+    grep -qxF 'dtparam=act_led_trigger=none' /boot/config.txt || echo 'dtparam=act_led_trigger=none' >> /boot/config.txt
+    grep -qxF 'dtparam=act_led_activelow=off' /boot/config.txt || echo 'dtparam=act_led_activelow=off' >> /boot/config.txt
+    # Turn off Ethernet ACT LED
+    grep -qxF 'dtparam=eth_led0=14' /boot/config.txt || echo 'dtparam=eth_led0=14' >> /boot/config.txt
+    # Turn off Ethernet LNK LED
+    grep -qxF 'dtparam=eth_led1=14' /boot/config.txt || echo 'dtparam=eth_led1=14' >> /boot/config.txt
     ;;
   
   4)
-    echo 'four'
+    # Pi 4
+    # Turn off Power LED
+    grep -qxF 'dtparam=pwr_led_trigger=default-on' /boot/config.txt || echo 'dtparam=pwr_led_trigger=default-on' >> /boot/config.txt
+    grep -qxF 'dtparam=pwr_led_activelow=off' /boot/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/config.txt
+    # Turn off Activity LED
+    grep -qxF 'dtparam=act_led_trigger=none' /boot/config.txt || echo 'dtparam=act_led_trigger=none' >> /boot/config.txt
+    grep -qxF 'dtparam=act_led_activelow=off' /boot/config.txt || echo 'dtparam=act_led_activelow=off' >> /boot/config.txt
+    # Turn off Ethernet ACT LED
+    grep -qxF 'dtparam=eth_led0=4' /boot/config.txt || echo 'dtparam=eth_led0=4' >> /boot/config.txt
+    # Turn off Ethernet LNK LED
+    grep -qxF 'dtparam=eth_led1=4' /boot/config.txt || echo 'dtparam=eth_led1=4' >> /boot/config.txt
     ;;
 esac
 
