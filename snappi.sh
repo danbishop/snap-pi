@@ -6,6 +6,10 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# Enable Hifiberry Overlay
+# TODO identify hifiberry amp and set correct overlay (hifiberry-amp)
+sed -i "/^dtparam=audio=on/c #dtparam=audio=on\ndtoverlay=hifiberry-dac" /boot/config.txt
+
 # Update OS
 apt-get update
 apt-get dist-upgrade -y
@@ -19,6 +23,8 @@ apt-get install -y /tmp/snapclient.deb
 
 # Make filesystem readonly
 raspi-config nonint enable_overlayfs
+# Make /boot read only
+raspi-config nonint enable_bootro
 
 # Reboot
 reboot
