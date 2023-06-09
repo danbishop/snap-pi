@@ -48,7 +48,7 @@ case `raspi-config nonint get_pi_type` in
   3)
     # Pi 3
     # Turn off Power LED
-    grep -qxF 'dtparam=pwr_led_trigger=default-on' /boot/config.txt || echo 'dtparam=pwr_led_trigger=default-on' >> /boot/config.txt
+    grep -qxF 'dtparam=pwr_led_trigger=none' /boot/config.txt || echo 'dtparam=pwr_led_trigger=none' >> /boot/config.txt
     grep -qxF 'dtparam=pwr_led_activelow=off' /boot/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/config.txt
     # Turn off Activity LED
     grep -qxF 'dtparam=act_led_trigger=none' /boot/config.txt || echo 'dtparam=act_led_trigger=none' >> /boot/config.txt
