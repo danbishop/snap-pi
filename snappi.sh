@@ -74,10 +74,6 @@ case `raspi-config nonint get_pi_type` in
     ;;
 esac
 
-# Disable LEDs
-grep -qxF 'dtparam=act_led_trigger=none' /boot/config.txt || echo 'dtparam=act_led_trigger=none' >> /boot/config.txt
-grep -qxF 'dtparam=act_led_activelow=on' /boot/config.txt || echo 'dtparam=act_led_activelow=on' >> /boot/config.txt
-
 # Make filesystem readonly
 raspi-config nonint enable_overlayfs
 # Make /boot read only
