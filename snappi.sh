@@ -22,8 +22,6 @@ wget https://github.com/badaix/snapcast/releases/download/v0.27.0/snapclient_0.2
 apt-get install -y /tmp/snapclient.deb
 
 # Power Optimisations
-# Disable HDMI
-sudo /opt/vc/bin/tvservice -o
 # Disable BT and WiFi
 grep -qxF 'dtoverlay=disable-bt' /boot/config.txt || echo 'dtoverlay=disable-bt' >> /boot/config.txt
 grep -qxF 'dtoverlay=disable-wifi' /boot/config.txt || echo 'dtoverlay=disable-wifi' >> /boot/config.txt
@@ -42,7 +40,7 @@ case `raspi-config nonint get_pi_type` in
     ;;
 
   2)
-    echo ''
+    echo 'two'
     ;;
 
   3)
