@@ -6,6 +6,10 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# Get version of raspbian
+source /etc/os-release
+
+
 # Enable Hifiberry Overlay
 # TODO identify hifiberry amp and set correct overlay (hifiberry-amp)
 sed -i "/^dtparam=audio=on/c #dtparam=audio=on\ndtoverlay=hifiberry-dac" /boot/firmware/config.txt
@@ -18,7 +22,7 @@ apt-get dist-upgrade -y
 ( crontab -l | grep -v -F "/sbin/shutdown -r +5" || : ; echo "45 5   *   *   *    /sbin/shutdown -r +5" ) | crontab -
 
 # Download and install snapclient
-wget https://github.com/badaix/snapcast/releases/download/v0.30.0/snapclient_0.30.0-1_armhf_bookworm.deb -O /tmp/snapclient.deb
+wget https://github.com/badaix/snapcast/releases/download/v0.30.0/snapclient_0.30.0-1_armhf_$VERSION_CODENAME.deb -O /tmp/snapclient.deb
 apt-get install -y /tmp/snapclient.deb
 
 # Power Optimisations
