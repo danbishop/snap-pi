@@ -1,0 +1,27 @@
+#!/bin/bash
+USERNAME=dan
+HOSTS="bathroom hallway livingroom diningroom kitchen garden"
+
+# Disable overlay filesystem on each pi
+for HOSTNAME in ${HOSTS} ; do
+    echo "Updating ${HOSTNAME}"
+    ssh -l ${USERNAME} ${HOSTNAME} "sudo raspi-config nonint do_overlayfs 1; sudo reboot"
+done
+
+# Update OS
+for HOSTNAME in ${HOSTS} ; do
+    echo "Updating ${HOSTNAME}"
+    ssh -l ${USERNAME} ${HOSTNAME} "sudo apt-get update; sudo apt-get -y dist-upgrade"
+done
+
+# Update snapcast
+for HOSTNAME in ${HOSTS} ; do
+    echo "Updating ${HOSTNAME}"
+    ssh -l ${USERNAME} ${HOSTNAME} "source /etc/os-release; wget -O /tmp/snapclient.deb https://github.com/badaix/snapcast/releases/download/v0.30.0/snapclient_0.30.0-1_armhf_$VERSION_CODENAME.deb; sudo apt-get install /tmp/snapclient.deb"
+done
+
+# Re-enable overlay filesystem on each pi
+for HOSTNAME in ${HOSTS} ; do
+    echo "Updating ${HOSTNAME}"
+    ssh -l ${USERNAME} ${HOSTNAME} "sudo raspi-config nonint do_overlayfs 0; sudo reboot"
+done
