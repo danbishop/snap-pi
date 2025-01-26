@@ -22,7 +22,7 @@ apt-get dist-upgrade -y
 ( crontab -l | grep -v -F "/sbin/shutdown -r +5" || : ; echo "45 5   *   *   *    /sbin/shutdown -r +5" ) | crontab -
 
 # Download and install snapclient
-wget https://github.com/badaix/snapcast/releases/download/v0.30.0/snapclient_0.30.0-1_armhf_$VERSION_CODENAME.deb -O /tmp/snapclient.deb
+wget https://github.com/badaix/snapcast/releases/download/v0.31.0/snapclient_0.31.0-1_armhf_$VERSION_CODENAME.deb -O /tmp/snapclient.deb
 apt-get install -y /tmp/snapclient.deb
 
 # Power Optimisations
