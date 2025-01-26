@@ -2,6 +2,9 @@
 USERNAME=dan
 HOSTS="bathroom hallway livingroom diningroom kitchen garden"
 
+# Get version of raspbian
+source /etc/os-release
+
 # Disable overlay filesystem on each pi
 for HOSTNAME in ${HOSTS} ; do
     echo "Disabling overlay filesystem on ${HOSTNAME}"
