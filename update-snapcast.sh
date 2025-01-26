@@ -8,6 +8,8 @@ for HOSTNAME in ${HOSTS} ; do
     ssh -l ${USERNAME} ${HOSTNAME} "sudo raspi-config nonint do_overlayfs 1; sudo reboot"
 done
 
+sleep 120
+
 # Update OS
 for HOSTNAME in ${HOSTS} ; do
     echo "Updating OS on ${HOSTNAME}"
@@ -17,7 +19,7 @@ done
 # Update snapcast
 for HOSTNAME in ${HOSTS} ; do
     echo "Updating snapcast on ${HOSTNAME}"
-    ssh -l ${USERNAME} ${HOSTNAME} "source /etc/os-release; wget -O /tmp/snapclient.deb https://github.com/badaix/snapcast/releases/download/v0.30.0/snapclient_0.30.0-1_armhf_$VERSION_CODENAME.deb; sudo apt-get install /tmp/snapclient.deb"
+    ssh -l ${USERNAME} ${HOSTNAME} "source /etc/os-release; wget -O /tmp/snapclient.deb https://github.com/badaix/snapcast/releases/download/v0.31.0/snapclient_0.31.0-1_armhf_$VERSION_CODENAME.deb; sudo apt-get install /tmp/snapclient.deb"
 done
 
 # Re-enable overlay filesystem on each pi
