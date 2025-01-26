@@ -2,9 +2,6 @@
 USERNAME=dan
 HOSTS="bathroom hallway livingroom diningroom kitchen garden"
 
-# Get version of raspbian
-source /etc/os-release
-
 # Disable overlay filesystem on each pi
 for HOSTNAME in ${HOSTS} ; do
     echo "Disabling overlay filesystem on ${HOSTNAME}"
@@ -22,7 +19,7 @@ done
 # Update snapcast
 for HOSTNAME in ${HOSTS} ; do
     echo "Updating snapcast on ${HOSTNAME}"
-    ssh -l ${USERNAME} ${HOSTNAME} "source /etc/os-release; wget -O /tmp/snapclient.deb https://github.com/badaix/snapcast/releases/download/v0.31.0/snapclient_0.31.0-1_armhf_$VERSION_CODENAME.deb; sudo apt-get install /tmp/snapclient.deb"
+    ssh -l ${USERNAME} ${HOSTNAME} 'source /etc/os-release; wget -O /tmp/snapclient.deb https://github.com/badaix/snapcast/releases/download/v0.31.0/snapclient_0.31.0-1_armhf_$VERSION_CODENAME.deb; sudo apt-get install /tmp/snapclient.deb'
 done
 
 # Re-enable overlay filesystem on each pi
