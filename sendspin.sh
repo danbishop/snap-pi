@@ -1,52 +1,85 @@
 #!/bin/bash
-sudo apt-get update
-sudo apt-get install -y golang libopus-dev libopusfile-dev libasound2-dev
-go install github.com/Sendspin/sendspin-go@latest
 
-# Configuration
-SERVICE_NAME="sendspin"
-BINARY_PATH="$HOME/go/bin/sendspin-go"
-USER_NAME=$(whoami)
-GROUP_NAME=$(id -gn)
-
-echo "--- Setting up $SERVICE_NAME as a systemd service ---"
-
-# 1. Check if binary exists
-if [ ! -f "$BINARY_PATH" ]; then
-    echo "Error: Binary not found at $BINARY_PATH"
-    echo "Please run 'go install github.com/Sendspin/sendspin-go@latest' first."
-    exit 1
+# sudo check
+if [ "$EUID" -ne 0 ]
+  then echo "Please run with sudo"
+  exit
 fi
 
-# 2. Create the service file using a 'Here Document'
-# We use sudo tee to write to a protected directory
-sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null <<EOF
-[Unit]
-Description=Sendspin Go Service
-After=network.target sound.target
+# Disable sudo password to make updates etc easier.
+echo "$USER ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/010_pi-nopasswd
 
-[Service]
-User=$USER_NAME
-Group=$GROUP_NAME
-ExecStart=$BINARY_PATH
-Restart=always
-RestartSec=5
-SupplementaryGroups=audio
-WorkingDirectory=$HOME
+# Update OS
+apt-get update
+apt-get dist-upgrade -y
 
-[Install]
-WantedBy=multi-user.target
-EOF
+# Enable Hifiberry Overlay
+# TODO identify hifiberry amp and set correct overlay (hifiberry-amp)
+sed -i "/^dtparam=audio=on/c #dtparam=audio=on\ndtoverlay=hifiberry-dac" /boot/firmware/config.txt
 
-echo "--- Service file created at /etc/systemd/system/$SERVICE_NAME.service ---"
+# Start reboot at 05:45 every day (give 5 minute warning to anyone logged in)
+( crontab -l | grep -v -F "/sbin/shutdown -r +5" || : ; echo "45 5   *   *   *    /sbin/shutdown -r +5" ) | crontab -
 
-# 3. Reload, Enable, and Start
-echo "--- Initialising systemd service ---"
-sudo systemctl daemon-reload
-sudo systemctl enable $SERVICE_NAME.service
-sudo systemctl restart $SERVICE_NAME.service
+# Install sendspin
+ curl -fsSL https://raw.githubusercontent.com/LeoLTM/sendspin-armv6/main/scripts/install.sh | sudo bash
 
-# 4. Show status
-echo "--- Setup Complete! Checking status: ---"
-sleep 2
-sudo systemctl status $SERVICE_NAME --no-pager
+# TODO CONFIGURE SENDSPIN
+
+# Power Optimisations
+# Disable BT and WiFi
+grep -qxF 'dtoverlay=disable-bt' /boot/firmware/config.txt || echo 'dtoverlay=disable-bt' >> /boot/firmware/config.txt
+grep -qxF 'dtoverlay=disable-wifi' /boot/firmware/config.txt || echo 'dtoverlay=disable-wifi' >> /boot/firmware/config.txt
+# Pi specific savings
+case `raspi-config nonint get_pi_type` in
+
+  0)
+    # Pi Zero
+    # Turn off LED
+    grep -qxF 'dtparam=pwr_led_trigger=default-on' /boot/firmware/config.txt || echo 'dtparam=pwr_led_trigger=default-on' >> /boot/firmware/config.txt
+    grep -qxF 'dtparam=pwr_led_activelow=off' /boot/firmware/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/firmware/config.txt
+    ;;
+
+  1)
+    echo 'one'
+    ;;
+
+  2)
+    echo 'two'
+    ;;
+
+  3)
+    # Pi 3
+    # Turn off Power LED
+    grep -qxF 'dtparam=pwr_led_trigger=none' /boot/firmware/config.txt || echo 'dtparam=pwr_led_trigger=none' >> /boot/firmware/config.txt
+    grep -qxF 'dtparam=pwr_led_activelow=off' /boot/firmware/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/firmware/config.txt
+    # Turn off Activity LED
+    grep -qxF 'dtparam=act_led_trigger=none' /boot/firmware/config.txt || echo 'dtparam=act_led_trigger=none' >> /boot/firmware/config.txt
+    grep -qxF 'dtparam=act_led_activelow=off' /boot/firmware/config.txt || echo 'dtparam=act_led_activelow=off' >> /boot/firmware/config.txt
+    # Turn off Ethernet ACT LED
+    grep -qxF 'dtparam=eth_led0=14' /boot/firmware/config.txt || echo 'dtparam=eth_led0=14' >> /boot/firmware/config.txt
+    # Turn off Ethernet LNK LED
+    grep -qxF 'dtparam=eth_led1=14' /boot/firmware/config.txt || echo 'dtparam=eth_led1=14' >> /boot/firmware/config.txt
+    ;;
+
+  4)
+    # Pi 4
+    # Turn off Power LED
+    grep -qxF 'dtparam=pwr_led_trigger=default-on' /boot/firmware/config.txt || echo 'dtparam=pwr_led_trigger=default-on' >> /boot/firmware/config.txt
+    grep -qxF 'dtparam=pwr_led_activelow=off' /boot/firmware/config.txt || echo 'dtparam=pwr_led_activelow=off' >> /boot/firmware/config.txt
+    # Turn off Activity LED
+    grep -qxF 'dtparam=act_led_trigger=none' /boot/firmware/config.txt || echo 'dtparam=act_led_trigger=none' >> /boot/firmware/config.txt
+    grep -qxF 'dtparam=act_led_activelow=off' /boot/firmware/config.txt || echo 'dtparam=act_led_activelow=off' >> /boot/firmware/config.txt
+    # Turn off Ethernet ACT LED
+    grep -qxF 'dtparam=eth_led0=4' /boot/firmware/config.txt || echo 'dtparam=eth_led0=4' >> /boot/firmware/config.txt
+    # Turn off Ethernet LNK LED
+    grep -qxF 'dtparam=eth_led1=4' /boot/firmware/config.txt || echo 'dtparam=eth_led1=4' >> /boot/firmware/config.txt
+    ;;
+esac
+
+# Make filesystem readonly
+raspi-config nonint enable_overlayfs
+# Make /boot read only
+raspi-config nonint enable_bootro
+
+# Reboot
+reboot
